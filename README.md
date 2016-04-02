@@ -150,3 +150,66 @@ class Register {
     }
 }
 ```
+###观察者模式
+好心水这个。一个事件发生后还有一系列的对象要跟着做，以往就是写在后面，可这样代码耦合度就搞了，多了之后就不好维护了。
+要建事件以及观察者
+事件类里要由触发事件的方法，然后就是要有通知其他要更新的类的方法，可以把这些写在一个抽象类里面
+```php
+abstract class EventGenerator {
+
+    private $observers = array();//被添加的观察者
+
+    function addObserver (Observer $observer) { /添加观察者
+        $this->observers[] = $observer;
+    }
+
+    function notify () { //通知观察者
+        foreach($this->observers as $observer){
+            $observer->updata();
+        }
+    }
+}
+```
+接下来就是观察者的接口
+```php
+interface Observer {
+    function updata();
+}
+```
+下面是具体的事件类和观察者
+```php
+<?php
+class touch extends \IMooc\EventGenerator{ //事件发生类
+
+    function happen(){
+        echo "事件发生\n";
+        $this->notify();
+    }
+}
+
+class Observer1 implements \IMooc\Observer { //事件发生时要跟新的类1
+    function updata()
+    {
+        echo "逻辑1\n";
+    }
+}
+
+class Observer2 implements \IMooc\Observer { //事件发生时要跟新的类2
+    function updata()
+    {
+        echo "逻辑2\n";
+    }
+}
+
+$event = new touch();
+$event->addObserver(new Observer1());//添加一个观察者;
+$event->addObserver(new Observer2());//可添加多个观察者
+$event->happen();//触发事件
+```
+执行结果
+```
+事件发生
+逻辑1
+逻辑2
+```
+添加和删除观察者就可以方便的添加或去掉事件发生后的各种逻辑
