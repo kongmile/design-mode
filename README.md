@@ -213,3 +213,112 @@ $event->happen();//触发事件
 逻辑2
 ```
 添加和删除观察者就可以方便的添加或去掉事件发生后的各种逻辑
+###原型模式
+clone对象。当要用一个类多次，初始化的计算开销比较大时，代码又重复一堆，可以初始化后克隆对象，再分别执行操作，节省资源，提高效率。
+```php
+$prototype = new IMooc\Canvas();//原型
+$prototype->init();//初始化
+
+$canvas1 = clone $prototype;//克隆
+$canvas1->rect(3,6,4,12);
+$canvas1->draw();
+
+echo "===========================<br/>";
+
+$canvas2 = clone $prototype;//克隆
+$canvas2->rect(1, 3, 2, 6);
+$canvas2->draw();
+```
+###装饰器模式
+类似观察者模式，还是把装饰分别在外面加上了，添东西时就不用改里面，添加删除都可以方便的在外面执行
+首先定义一个接口
+```php
+interface DrawDecorator
+{
+    function beforeDraw();
+    function afterDraw();
+}
+```
+可以按照接口写装饰器
+颜色装饰器：
+```php
+class ColorDrawDecorator implements DrawDecorator
+{
+    protected $color;
+    function __construct($color = 'red')
+    {
+        $this->color = $color;
+    }
+    function beforeDraw()
+    {
+        echo "<div style='color: {$this->color};'>";
+    }
+    function afterDraw()
+    {
+        echo "</div>";
+    }
+}
+```
+然后就能用了
+```php
+
+$canvas = new IMooc\Canvas();
+$canvas->addDecorator(new \IMooc\ColorDrawDecorator('green'));//添加颜色撞色器
+$canvas->addDecorator(new \IMooc\SizeDrawDecorator());//添加大小装饰器
+$canvas->init();
+$canvas->rect(3,6, 4,12);
+$canvas->draw();
+```
+###迭代器
+这个方法有点多，一开始看的一头雾水，看完代码觉得很奇怪，为什么方法自己就按顺序执行了，后来发现好像是foreach指挥的。先是rewind方法（返回到迭代器的第一个元素），再是valid方法（检查当前位置是否有效），再是current方法（返回当前元素），最后是key方法（返回当前元素的键）。第一次过后，后面除了rewind换成next方法（向前移动到下一个元素）外，其余仍旧相同。
+我看不懂迭代器的有什么意义，网上讲得好抽象啊（主要是因为我水平不够），下面这句话是什么意思啊
+> 不必关心多种多样的数据结构的具体细节
+
+```php
+<?php
+class myIterator implements Iterator {
+    private $position = 0;
+    private $array = array(
+        "firstelement",
+        "secondelement",
+        "lastelement",
+    );  
+
+    public function __construct() {
+        $this->position = 0;
+    }
+
+    function rewind() {
+        var_dump(__METHOD__);
+        $this->position = 0;
+    }
+
+    function current() {
+        var_dump(__METHOD__);
+        return $this->array[$this->position];
+    }
+
+    function key() {
+        var_dump(__METHOD__);
+        return $this->position;
+    }
+
+    function next() {
+        var_dump(__METHOD__);
+        ++$this->position;
+    }
+
+    function valid() {
+        var_dump(__METHOD__);
+        return isset($this->array[$this->position]);
+    }
+}
+
+$it = new myIterator;
+
+foreach($it as $key => $value) {
+    var_dump($key, $value);
+    echo "\n";
+}
+?>
+```
